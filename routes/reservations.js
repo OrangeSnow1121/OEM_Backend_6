@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const Reservation = require("../models/Reservation");
@@ -19,9 +18,10 @@ const verifyToken = (req, res, next) => {
 
 router.post("/", verifyToken, async (req, res) => {
   try {
-    const newReservation = new Reservation({
-      ...req.body,
-      username: req.user.username
+    const newReservation = new Reservation({ 
+      ...req.body, 
+      user: req.user.id, 
+      username: req.user.username 
     });
     await newReservation.save();
     res.status(201).json(newReservation);
@@ -32,7 +32,7 @@ router.post("/", verifyToken, async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const reservations = await Reservation.find();
+    const reservations = await Reservation.find().populate("user", "username");
     res.json(reservations);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -45,6 +45,23 @@ router.get("/:date", async (req, res) => {
     res.json(reservations);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// New DELETE route
+router.delete("/:id", verifyToken, async (req, res) => {
+  try {
+    const reservation = await Reservation.findById(req.params.id);
+    if (!reservation) return res.status(404).send("Not found");
+
+    if (reservation.username !== req.user.username && req.user.role !== "admin") {
+      return res.status(403).send("Forbidden");
+    }
+
+    await reservation.remove();
+    res.send("Deleted");
+  } catch (err) {
+    res.status(500).send("Server error");
   }
 });
 
