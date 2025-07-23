@@ -3,6 +3,7 @@ const router = express.Router();
 const Reservation = require("../models/Reservation");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
+const reservationRoutes = require("./routes/reservations");
 
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
