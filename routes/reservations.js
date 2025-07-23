@@ -17,6 +17,8 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+app.use('/reservations', reservationRoutes);
+
 // POST a new reservation
 router.post("/", verifyToken, async (req, res) => {
   try {
